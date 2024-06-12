@@ -1,87 +1,75 @@
-#!/usr/bin/ucrun
+#!/usr/bin/ucode -S
 
 push(REQUIRE_SEARCH_PATH, '/usr/share/rrmd/*.uc');
 
 global.nl80211 = require("nl80211");
+global.ubus = require('ubus');
 global.uloop = require("uloop");
 global.fs = require('fs');
 
-global.ulog = {
-	identity: 'rrm',
-	channels: [ 'stdio', 'syslog' ],
-};
-
-global.ubus = {
-	object: 'rrm',
-
-	connect: function() {
-		printf('connected to ubus\n');
+const rrm_methods = {
+	phys: {
+		call: function(msg) {
+			return global.phy.status();
+		}
 	},
 
-	methods: {
-		phys: {
-			cb: function(msg) {
-				return global.phy.status();
-			}
-		},
+	interfaces: {
+		call: function(msg) {
+			return global.local.status();
+		}
+	},
 
-		interfaces: {
-			cb: function(msg) {
-				return global.local.status();
-			}
-		},
+	stations: {
+		call: function(msg) {
+			return global.station.list(msg);
+		}
+	},
 
-		stations: {
-			cb: function(msg) {
-				return global.station.list(msg);
-			}
-		},
+	status: {
+		call: function(msg) {
+			return global.station.status();
+		}
+	},
 
-		status: {
-			cb: function(msg) {
-				return global.station.status();
-			}
-		},
+	command: {
+		call: function(msg) {
+			return global.command.handle(msg);
+		}
+	},
 
-		command: {
-			cb: function(msg) {
-				return global.command.handle(msg);
-			}
-		},
+	get_beacon_request: {
+		call: function(msg) {
+			let val = global.station.list(msg);
+			return val?.beacon_report || {};
+		}
+	},
 
-		get_beacon_request: {
-			cb: function(msg) {
-				let val = global.station.list(msg);
-				return val?.beacon_report || {};
-			}
+	policy: {
+		call: function(msg) {
+			return global.policy.status(msg);
 		},
+	},
 
-		policy: {
-			cb: function(msg) {
-				return global.policy.status(msg);
-			},
+	reload: {
+		call: function(msg) {
+			global.config.init();
+			for (let module in [ 'local', 'station' ])
+				global[module].reload();
 		},
+	},
 
-		reload: {
-			cb: function(msg) {
-				global.config.init();
-				for (let module in [ 'local', 'station' ])
-					global[module].reload();
-			},
-		},
-
-		scan_dump: {
-			cb: function(msg) {
-				return global.scan.beacons;
-			},
+	scan_dump: {
+		call: function(msg) {
+			return global.scan.beacons;
 		},
 	},
 };
 
-global.start = function() {
+function start() {
 	try {
 		global.uci = require('uci').cursor();
-		global.ubus.conn = require('ubus').connect();
+		global.ubus.conn = global.ubus.connect(null, 60);
 
 		for (let module in [ 'config', 'event', 'phy', 'scan', 'neighbor', 'local', 'station', 'command', 'policy' ]) {
 			printf('loading ' + module + '\n');
@@ -89,11 +77,11 @@ global.start = function() {
 			if (exists(global[module], 'init'))
 				global[module].init();
 		}
+		global.ubus.conn.publish('rrm', rrm_methods);
 	} catch(e) {
                 printf('exception %.J %.J\n', e, e.stacktrace[0].context);
 	}
 };
 
-global.stop = function() {
-	ulog_info('stopping\n');
-};
+start();
+uloop.run();

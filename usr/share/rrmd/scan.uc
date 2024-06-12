@@ -151,6 +151,6 @@ return {
 	},
 
 	init: function() {
-		uloop_timeout(scan_timer, 5000);
+		global.uloop.timer(5000, scan_timer);
 	},
 };

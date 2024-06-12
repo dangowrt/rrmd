@@ -153,7 +153,7 @@ return {
 		global.local.register_handler('disassoc', disassoc_handler);
 
 		/* initial probe of associated stations */
-		uloop_timeout(stations_update, 100);
+		global.uloop.timer(100, stations_update);
 	},
 
 	status: function() {
