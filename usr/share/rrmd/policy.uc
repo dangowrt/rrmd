@@ -7,16 +7,16 @@ return {
 				continue;
 			let policy = require(`policy_${config[section].name}`);
 			if (type(policy) != 'object' || type(policy.init) != 'function') {
-				ulog_info('failed to load policy "%s"\n', config[section].name);
+				//ulog_info('failed to load policy "%s"\n', config[section].name);
 				continue;
 			}
 			try {
 				policy.init(config[section]);
 			} catch(e) {
-				ulog_info('failed to initialze policy "%s"\n', config[section].name);
+				//ulog_info('failed to initialze policy "%s"\n', config[section].name);
 				continue;
 			}
-			ulog_info('loaded policy "%s"\n', config[section].name);
+			//ulog_info('loaded policy "%s"\n', config[section].name);
 			policies[config[section].name] = policy;
 		}
 	},

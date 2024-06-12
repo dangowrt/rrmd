@@ -37,7 +37,7 @@ function channel_survey(dev) {
 	let res = nl80211.request(def.NL80211_CMD_GET_SURVEY, def.NLM_F_DUMP, { dev });
 
 	if (!res) {
-		ulog_err(sprintf('failed to update survey for %s', dev));
+		//ulog_err(sprintf('failed to update survey for %s', dev));
 		return;
 	}
 
@@ -113,7 +113,7 @@ function interfaces_subunsub(path, sub) {
 		return;
 	name = name[1];
 
-	ulog_info(sprintf('%s %s\n', sub ? 'add' : 'remove', path));
+	//ulog_info(sprintf('%s %s\n', sub ? 'add' : 'remove', path));
 
 	/* the hostapd instance disappeared */
 	if (!sub) {

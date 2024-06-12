@@ -9,7 +9,7 @@ function station_add(device, addr, data, seen, bssid) {
 
 	/* if the station is new, add the initial entry */
 	if (!stations[addr]) {
-		ulog_info(`add station ${ addr }\n`);
+		//ulog_info(`add station ${ addr }\n`);
 		add = true;
 
 		/* extract the rrm bits and give them meaningful names */
@@ -64,7 +64,7 @@ function station_add(device, addr, data, seen, bssid) {
 function station_del(addr) {
 	if (!stations[addr])
 		return;
-	ulog_info(`deleting ${ addr }\n`);
+	//ulog_info(`deleting ${ addr }\n`);
 
 	/* send an event */
 	global.event.send('rrm.station.del', { addr, bssid: stations[addr].bssid });
@@ -108,7 +108,7 @@ function stations_update() {
 function beacon_report(type, report) {
 	/* make sure that the station exists */
 	if (!stations[report.address]) {
-		ulog_err(`beacon report on unknown station ${report.address}\n`);
+		//ulog_err(`beacon report on unknown station ${report.address}\n`);
 		return true;
 	}
 
@@ -195,13 +195,13 @@ return {
 
 		/* make sure that the station exists */
 		if (!station) {
-			ulog_err(`beacon request on unknown station ${msg.addr}`);
+			//ulog_err(`beacon request on unknown station ${msg.addr}`);
 			return false;
 		}
 
 		/* make sure that the station supports active beacon requests */
 		if (!station.rrm?.beacon_active_measure) {
-			ulog_err(`${msg.addr} does not support beacon requests`);
+			//ulog_err(`${msg.addr} does not support beacon requests`);
 			return false;
 		}
 
