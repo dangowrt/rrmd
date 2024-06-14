@@ -1,7 +1,6 @@
 let nl80211 = require("nl80211");
 let def = nl80211.const;
 let interfaces_subscriber;
-let ucentral_subscriber;
 let state = {};
 let interfaces = {};
 let handlers = {};
@@ -178,17 +177,8 @@ function interfaces_subunsub(path, sub) {
 	global.scan.add_wdev(name, status.phy); 
 }
 
-function ucentral_subunsub(sub) {
-	if (!sub)
-		return;
-	ucentral_subscriber.subscribe('ucentral');
-}
-
 function interfaces_listener(event, msg) {
 	interfaces_subunsub(msg.path, event == 'ubus.object.add');
-
-	if (msg.path == 'ucentral')
-		ucentral_subunsub(event == 'ubus.object.add');
 }
 
 function interfaces_handle_event(req) {
@@ -200,10 +190,6 @@ function interfaces_handle_event(req) {
 	if (!reply)
 		return;
 	req.reply();
-}
-
-function ucentral_handle_event(req) {
-	printf('%.J\n', req);
 }
 
 function channel_switch_handler(type, data) {
@@ -229,9 +215,6 @@ return {
 		interfaces_subscriber = global.ubus.conn.subscriber(
 			interfaces_handle_event,
 			function(msg) {	});
-		ucentral_subscriber = global.ubus.conn.subscriber(
-			ucentral_handle_event,
-			function(msg) { });
 
 		/* register a callback that will monitor hostapd instances spawning and disappearing */
 		global.ubus.conn.listener('ubus.object.add', interfaces_listener);
@@ -240,8 +223,6 @@ return {
 		/* iterade over all existing hostapd instances and subscribe to them */
 		for (let path in global.ubus.conn.list()) {
 			interfaces_subunsub(path, true);
-			if (path == 'ucentral')
-				ucentral_subunsub(true);
 		}
 
 //		uloop_timeout(interfaces_update, 5000);

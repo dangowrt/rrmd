@@ -1,10 +1,7 @@
 return {
 
 send: function(type, payload) {
-	global.ubus.conn.call('ucentral', 'event', {
-		type,
-		payload
-	});
+	// ToDo: implement P2P events using v6 multicast group
 },
 
 };
