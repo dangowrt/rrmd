@@ -40,30 +40,6 @@ function scan_parse(data) {
 			case 114:
 				beacon.meshid = ie.data;
 				break;
-			case 0xdd:
-				let oui = hexenc(substr(ie.data, 0, 3));
-				let type = ord(ie.data, 3);
-				let data = substr(ie.data, 4);
-				switch (oui) {
-				case '48d017':
-					beacon.tip = true;
-					switch(type) {
-					case 1:
-						if (data)
-							beacon.tip_name = data;
-						break;
-					case 2:
-						if (data)
-							beacon.tip_serial = data;
-						break;
-					case 3:
-						if (data)
-							beacon.tip_network_id = data;
-						break;
-					}
-					break;
-				}
-				break;
 			}
 		beacons[bss.bssid] = beacon;
 	}
